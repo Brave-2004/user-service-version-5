@@ -1,6 +1,6 @@
-package repository;
+package Application.repository;
 
-import model.User;
+import Application.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

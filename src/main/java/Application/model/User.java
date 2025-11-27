@@ -1,4 +1,4 @@
-package model;
+package Application.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -8,8 +8,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import model.template.UuidMappedClass;
-import unum.StatusEnum;
+import Application.model.template.UuidMappedClass;
+import Application.unum.StatusEnum;
 
 import java.time.LocalDate;
 

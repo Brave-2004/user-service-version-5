@@ -1,15 +1,15 @@
-package controller;
+package Application.controller;
 
-import dto.CreateUserRequest;
-import dto.UpdateUserRequest;
-import dto.UserDto;
-import mapper.UserMapper;
-import model.User;
+import Application.dto.CreateUserRequest;
+import Application.dto.UpdateUserRequest;
+import Application.dto.UserDto;
+import Application.mapper.UserMapper;
+import Application.model.User;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-import service.UserService;
+import Application.service.UserService;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,7 +27,6 @@ public class UserController {
 
     @GetMapping("/me")
     public UserDto getCurrentUser(@AuthenticationPrincipal Jwt jwt) {
-        System.out.println("getCurrentUser");
         String keycloakId = jwt.getSubject();
         User user = userService.getUserByKeycloakId(keycloakId);
         return UserMapper.toDto(user);

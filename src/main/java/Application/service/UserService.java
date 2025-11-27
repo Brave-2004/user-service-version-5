@@ -1,8 +1,8 @@
-package service;
+package Application.service;
 
-import dto.CreateUserRequest;
-import dto.UpdateUserRequest;
-import model.User;
+import Application.dto.CreateUserRequest;
+import Application.dto.UpdateUserRequest;
+import Application.model.User;
 
 import java.util.List;
 import java.util.UUID;

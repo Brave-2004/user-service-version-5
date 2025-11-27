@@ -1,7 +1,5 @@
-package dto;
+package Application.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -13,25 +11,19 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateUserRequest {
+public class UpdateUserRequest {
 
-    @Email(message = "Invalid email format")
-    @NotBlank
-    private String email;
+    @Size(min = 3, max = 255)
+    private String firstName;
+
+    @Size(min = 3, max = 255)
+    private String lastName;
 
     @Pattern(
             regexp = "^\\+998([0-9]{9})$",
             message = "Phone number must be in format +998XXXXXXXXX"
     )
     private String phoneNumber;
-
-    @NotBlank
-    @Size(min = 3, max = 255)
-    private String firstName;
-
-    @NotBlank
-    @Size(min = 3, max = 255)
-    private String lastName;
 
     @Pattern(
             regexp = "^[A-Z]{2}[0-9]{7}$",

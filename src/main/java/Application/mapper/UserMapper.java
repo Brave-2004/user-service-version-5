@@ -1,10 +1,10 @@
-package mapper;
+package Application.mapper;
 
-import dto.CreateUserRequest;
-import dto.UpdateUserRequest;
-import dto.UserDto;
-import model.User;
-import unum.StatusEnum;
+import Application.dto.CreateUserRequest;
+import Application.dto.UpdateUserRequest;
+import Application.dto.UserDto;
+import Application.model.User;
+import Application.unum.StatusEnum;
 
 import java.time.Instant;
 

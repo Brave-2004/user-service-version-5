@@ -1,13 +1,12 @@
-package service.impl;
+package Application.service;
 
-import dto.CreateUserRequest;
-import dto.UpdateUserRequest;
-import mapper.UserMapper;
-import model.User;
+import Application.dto.CreateUserRequest;
+import Application.dto.UpdateUserRequest;
+import Application.mapper.UserMapper;
+import Application.model.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import repository.UserRepository;
-import service.UserService;
+import Application.repository.UserRepository;
 
 import java.util.List;
 import java.util.UUID;

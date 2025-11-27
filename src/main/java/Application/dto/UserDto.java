@@ -1,9 +1,9 @@
-package dto;
+package Application.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import unum.StatusEnum;
+import Application.unum.StatusEnum;
 
 import java.time.Instant;
 import java.time.LocalDate;

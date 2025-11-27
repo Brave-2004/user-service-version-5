@@ -1,9 +1,17 @@
 spring:
   datasource:
-    url: jdbc:postgresql://db:5432/usersdb
+    url: jdbc:postgresql://localhost:5432/usersdb
     username: postgres
-    password: 0926
+    password: 926
+
   jpa:
     hibernate:
-      ddl-auto: updategit
+      ddl-auto: update
+      dialect: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/brave

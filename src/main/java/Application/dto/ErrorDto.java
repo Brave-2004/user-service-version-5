@@ -1,10 +1,9 @@
-package dto;
+package Application.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.validation.FieldError;
 
 import java.util.List;
 @AllArgsConstructor

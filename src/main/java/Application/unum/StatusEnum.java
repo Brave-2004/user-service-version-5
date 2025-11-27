@@ -1,4 +1,4 @@
-package unum;
+package Application.unum;
 
 public enum StatusEnum {
     VERIFIED,
