@@ -5,6 +5,7 @@ import Application.dto.UpdateUserRequest;
 import Application.dto.UserDto;
 import Application.mapper.UserMapper;
 import Application.model.User;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -24,7 +25,7 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
-
+    @PreAuthorize("hasAnyRole('user','admin')")
     @GetMapping("/me")
     public UserDto getCurrentUser(@AuthenticationPrincipal Jwt jwt) {
         String keycloakId = jwt.getSubject();
@@ -49,7 +50,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('admin') or #id.toString() == authentication.principal.subject")
-    public UserDto updateUser(@PathVariable UUID id, @RequestBody UpdateUserRequest req) {
+    public UserDto updateUser(@PathVariable UUID id, @RequestBody @Valid UpdateUserRequest req) {
         User user = userService.updateUser(id, req);
         return UserMapper.toDto(user);
     }
@@ -61,7 +62,7 @@ public class UserController {
     }
 
     @GetMapping("/test")
-    @PreAuthorize("hasRole('admin')")
+    @PreAuthorize("hasRole('user')")
     public void Test() {
         System.out.println("It is working");
     }

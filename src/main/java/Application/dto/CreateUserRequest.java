@@ -15,6 +15,12 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class CreateUserRequest {
 
+    @NotBlank
+    private String username;
+
+    @NotBlank
+    private String password;
+
     @Email(message = "Invalid email format")
     @NotBlank
     private String email;
@@ -26,11 +32,11 @@ public class CreateUserRequest {
     private String phoneNumber;
 
     @NotBlank
-    @Size(min = 3, max = 255)
+    @Size(min = 3, max = 255,message = "the length of firstName should be between 3 and 255")
     private String firstName;
 
     @NotBlank
-    @Size(min = 3, max = 255)
+    @Size(min = 3, max = 255,message = "the length of lastName should be between 3 and 255")
     private String lastName;
 
     @Pattern(
