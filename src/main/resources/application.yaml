@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/usersdb
     username: postgres
-    password: 926
+    password: 0926
 
   jpa:
     hibernate:
@@ -10,8 +10,22 @@ spring:
       dialect: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
 
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:8081/realms/brave
+keycloak:
+  auth-server-url: http://localhost:8081
+  realm: brave
+  client-id: brave-rest-api
+  client-secret: none
+
+security:
+  oauth2:
+    resourceserver:
+      jwt:
+        issuer-uri: http://localhost:8081/realms/brave
+logging:
+  level:
+    org.springframework.security: DEBUG
+
+
+
+
+
