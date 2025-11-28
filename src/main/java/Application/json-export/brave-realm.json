@@ -1,0 +1,44 @@
+{
+  "realm": "brave",
+  "enabled": true,
+  "users": [
+    {
+      "username": "brave",
+      "enabled": true,
+      "email": "brave20040926@gmail.com",
+      "firstName": "Jasurbek",
+      "lastName": "Djuraev",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "0926",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["client_admin"]
+    }
+  ],
+  "roles": {
+    "realm": ["client_admin", "client_user"]
+  },
+  "clients": [
+    {
+      "clientId": "brave-rest-api",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "your-client-secret",
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "defaultRoles": ["USER"],
+      "attributes": {},
+      "authorizationServicesEnabled": false,
+      "protocol": "openid-connect",
+      "clientAuthenticatorType": "client-secret",
+      "roles": {
+        "client": ["USER", "ADMIN"]
+      }
+    }
+  ]
+}

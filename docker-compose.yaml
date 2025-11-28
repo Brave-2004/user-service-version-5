@@ -10,6 +10,8 @@ services:
       - "5432:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.4.6
@@ -17,6 +19,14 @@ services:
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL_HOST: db
+      KC_DB_URL_DATABASE: keycloak
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: 0926
+      KC_IMPORT: /opt/keycloak/data/import/brave-realm.json
+    volumes:
+      - ./brave-realm.json:/opt/keycloak/data/import/brave-realm.json
     command: start-dev
     ports:
       - "8081:8080"
