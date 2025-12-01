@@ -1,31 +1,7 @@
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/usersdb
-    username: postgres
-    password: 926
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-      dialect: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: true
-
-keycloak:
-  auth-server-url: http://localhost:8081
-  realm: brave
-  client-id: brave-rest-api
-  client-secret: dTFN2FA8IP3kOcI8PWzsLraDdJToZ88K
-
-security:
-  oauth2:
-    resourceserver:
-      jwt:
-        issuer-uri: http://localhost:8081/realms/brave
-logging:
-  level:
-    org.springframework.security: DEBUG
-
-
-
-
-
+  profiles:
+    include:
+      - db
+      - jpa
+      - security
+      - keycloak

@@ -1,3 +1,0 @@
--- init-db.sql
-CREATE DATABASE IF NOT EXISTS usersdb;
-CREATE DATABASE IF NOT EXISTS keycloak;

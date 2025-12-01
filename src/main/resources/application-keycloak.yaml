@@ -1,0 +1,12 @@
+spring:
+  profiles: keycloak
+
+keycloak:
+  realm: brave
+  auth-server-url: http://localhost:8081
+  resource: brave-rest-api
+  credentials:
+    secret: your-client-secret
+  bearer-only: true
+  ssl-required: none
+  use-resource-role-mappings: true

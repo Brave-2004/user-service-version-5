@@ -2,9 +2,8 @@ package Application.controller;
 
 import Application.dto.CreateUserRequest;
 import Application.dto.LoginRequest;
-import Application.model.User;
-import Application.service.KeycloakAuthService;
-import Application.service.UserService;
+import Application.service.AuthService;
+import Application.service.KeycloakApiService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,36 +19,18 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final KeycloakAuthService keycloakAuthService;
-    private final UserService userService;
+    private final KeycloakApiService keycloakApiService;
+    private final AuthService authService;
 
 
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest request) {
-        Map<String, Object> tokens = keycloakAuthService.login(request.getUsername(), request.getPassword());
-        return ResponseEntity.ok(tokens);
+        return  ResponseEntity.ok(keycloakApiService.login(request.getUsername(), request.getPassword()));
     }
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> register(@RequestBody @Valid CreateUserRequest req) {
-        // Создаем пользователя в Keycloak
-        String keycloakId = keycloakAuthService.createKeycloakUser(
-                req.getUsername(),   // username
-                req.getPassword(),   // password
-                req.getEmail(),      // email
-                req.getFirstName(),  // firstName
-                req.getLastName()    // lastName
-        );
-
-        // 2️⃣ Назначаем роль "user" по умолчанию
-        keycloakAuthService.assignUserRole(keycloakId);
-        // Сохраняем пользователя в локальной БД
-        User user = userService.createUser(keycloakId, req);
-
-        // Логиним сразу и возвращаем токены
-        Map<String, Object> tokens = keycloakAuthService.login(req.getUsername(), req.getPassword());
-
-        return ResponseEntity.ok(tokens);
+        return ResponseEntity.ok(authService.register(req));
     }
 }

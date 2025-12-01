@@ -9,9 +9,19 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - db-data:/var/lib/postgresql/data
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - users-db-data:/var/lib/postgresql/data
 
+  keycloak-db:
+    image: postgres:15
+    container_name: keycloak-db
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 0926
+    ports:
+      - "5433:5432"
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.4.6
@@ -19,19 +29,22 @@ services:
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
+
       KC_DB: postgres
-      KC_DB_URL_HOST: db
+      KC_DB_URL_HOST: keycloak-db        # <<---- use the second Postgres
+      KC_DB_URL_PORT: 5432
       KC_DB_URL_DATABASE: keycloak
       KC_DB_USERNAME: postgres
       KC_DB_PASSWORD: 0926
-      KC_IMPORT: /opt/keycloak/data/import/brave-realm.json
+
+      KC_IMPORT_REALM: /opt/keycloak/data/import/brave-realm.json
     volumes:
-      - ./brave-realm.json:/opt/keycloak/data/import/brave-realm.json
+     - ./resources/json-export/brave-realm.json:/opt/keycloak/data/import/brave-realm.json
     command: start-dev
     ports:
       - "8081:8080"
     depends_on:
-      - db
+      - keycloak-db
 
   pgadmin:
     image: dpage/pgadmin4
@@ -43,6 +56,8 @@ services:
       - "5050:80"
     depends_on:
       - db
+      - keycloak-db
 
 volumes:
-  db-data:
+  users-db-data:
+  keycloak-db-data:

@@ -1,6 +1,5 @@
 package Application.security;
 
-import Application.service.KeycloakAuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

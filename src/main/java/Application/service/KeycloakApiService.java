@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class KeycloakAuthService {
+public class KeycloakApiService {
 
     @Value("${keycloak.auth-server-url}")
     private String keycloakUrl;
