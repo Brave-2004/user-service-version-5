@@ -1,7 +1,8 @@
+# application.yaml
 spring:
   profiles:
-    include:
-      - db
-      - jpa
-      - security
-      - keycloak
+    active: db,jpa,security,keycloak  # ✅ valid here
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.keycloak: DEBUG

@@ -1,7 +1,10 @@
+version: "3.9"
+
 services:
   db:
     image: postgres:15
     container_name: users-db
+    restart: unless-stopped
     environment:
       POSTGRES_DB: usersdb
       POSTGRES_USER: postgres
@@ -14,6 +17,7 @@ services:
   keycloak-db:
     image: postgres:15
     container_name: keycloak-db
+    restart: unless-stopped
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: postgres
@@ -26,29 +30,36 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.4.6
     container_name: keycloak
-    environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+    restart: unless-stopped
 
+    environment:
       KC_DB: postgres
-      KC_DB_URL_HOST: keycloak-db        # <<---- use the second Postgres
-      KC_DB_URL_PORT: 5432
-      KC_DB_URL_DATABASE: keycloak
       KC_DB_USERNAME: postgres
       KC_DB_PASSWORD: 0926
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_URL_PORT: 5432
+      KC_DB_URL_DATABASE: keycloak
 
-      KC_IMPORT_REALM: /opt/keycloak/data/import/brave-realm.json
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+
+    command:
+      - start-dev
+      - --import-realm
+
     volumes:
-     - ./resources/json-export/brave-realm.json:/opt/keycloak/data/import/brave-realm.json
-    command: start-dev
+      - ./src/main/resources/json-export/brave-realm.json:/opt/keycloak/data/import/brave-realm.json
+
     ports:
       - "8081:8080"
+
     depends_on:
       - keycloak-db
 
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin
+    restart: unless-stopped
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin

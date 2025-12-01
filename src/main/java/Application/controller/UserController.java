@@ -25,7 +25,7 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
-    @PreAuthorize("hasAnyRole('user','admin')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @GetMapping("/me")
     public UserDto getCurrentUser(@AuthenticationPrincipal Jwt jwt) {
         String keycloakId = jwt.getSubject();
@@ -34,7 +34,7 @@ public class UserController {
     }
 
     @GetMapping("/admin/all")
-    @PreAuthorize("hasRole('admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<UserDto> getAllUsers() {
         return userService.getAllUsers().stream().map(UserMapper::toDto).collect(Collectors.toList());
     }
@@ -49,20 +49,20 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('admin') or #id.toString() == authentication.principal.subject")
+    @PreAuthorize("hasRole('ADMIN') or #id.toString() == authentication.principal.subject")
     public UserDto updateUser(@PathVariable UUID id, @RequestBody @Valid UpdateUserRequest req) {
         User user = userService.updateUser(id, req);
         return UserMapper.toDto(user);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteUser(@PathVariable UUID id) {
         userService.deleteUser(id);
     }
 
     @GetMapping("/test")
-    @PreAuthorize("hasRole('user')")
+    @PreAuthorize("hasRole('USER')")
     public void Test() {
         System.out.println("It is working");
     }

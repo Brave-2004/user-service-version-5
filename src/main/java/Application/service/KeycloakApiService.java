@@ -1,5 +1,6 @@
 package Application.service;
 
+import Application.exception.InvalidCredentialsException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -8,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
@@ -18,7 +21,7 @@ import java.util.Map;
 public class KeycloakApiService {
 
     @Value("${keycloak.auth-server-url}")
-    private String keycloakUrl;
+    private String keycloakUrl;  // Must be something like "http://localhost:8081"
 
     @Value("${keycloak.realm}")
     private String realm;
@@ -28,6 +31,7 @@ public class KeycloakApiService {
 
     @Value("${keycloak.client-secret}")
     private String clientSecret;
+
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -76,14 +80,19 @@ public class KeycloakApiService {
         body.add("password", password);
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
-
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                keycloakUrl + "/realms/" + realm + "/protocol/openid-connect/token",
-                request,
-                Map.class
-        );
-
-        return response.getBody();
+        try {
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                    keycloakUrl + "/realms/" + realm + "/protocol/openid-connect/token",
+                    request,
+                    Map.class
+            );
+            return response.getBody();
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode().value() == 401) {
+                throw new InvalidCredentialsException("Invalid username or password.");
+            }
+            throw new RestClientException("Keycloak login failed: " + e.getMessage(), e);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -143,7 +152,7 @@ public class KeycloakApiService {
         );
 
         Map<String, Object> userRole = Arrays.stream(rolesResponse.getBody())
-                .filter(r -> r.get("name").equals("user"))
+                .filter(r -> r.get("name").equals("USER"))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("User role not found"));
 

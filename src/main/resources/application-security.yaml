@@ -1,5 +1,8 @@
+# application-security.yaml
 spring:
-  profiles: security
+  config:
+    activate:
+      on-profile: security
 
   security:
     oauth2:
@@ -7,8 +10,3 @@ spring:
         jwt:
           issuer-uri: http://keycloak:8080/realms/brave
           jwk-set-uri: http://keycloak:8080/realms/brave/protocol/openid-connect/certs
-
-logging:
-  level:
-    org.springframework.security: DEBUG
-    org.keycloak: DEBUG
