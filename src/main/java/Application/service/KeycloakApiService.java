@@ -87,11 +87,23 @@ public class KeycloakApiService {
                     Map.class
             );
             return response.getBody();
+
         } catch (HttpClientErrorException e) {
-            if (e.getStatusCode().value() == 401) {
+
+            int status = e.getStatusCode().value();
+            String response = e.getResponseBodyAsString();
+
+            // 🚫 Account locked by Keycloak
+            if (status == 429 || response.contains("Account locked")) {
+                throw new InvalidCredentialsException("Account locked. Try again in 3 minutes.");
+            }
+
+            // ❌ Wrong password but not locked yet
+            if (response.contains("Invalid user credentials")) {
                 throw new InvalidCredentialsException("Invalid username or password.");
             }
-            throw new RestClientException("Keycloak login failed: " + e.getMessage(), e);
+
+            throw new InvalidCredentialsException("Login failed.");
         }
     }
 
