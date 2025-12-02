@@ -46,9 +46,11 @@ services:
     command:
       - start-dev
       - --import-realm
+      - --http-enabled=true
 
     volumes:
       - ./src/main/resources/json-export/brave-realm.json:/opt/keycloak/data/import/brave-realm.json
+      - ./src/main/resources/scripts:/opt/keycloak/scripts
 
     ports:
       - "8081:8080"

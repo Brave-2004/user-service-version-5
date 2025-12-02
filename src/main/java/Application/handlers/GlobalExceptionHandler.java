@@ -3,6 +3,7 @@ package Application.handlers;
 import Application.dto.ErrorDto;
 import Application.dto.FieldErrorDto;
 import Application.exception.InvalidCredentialsException;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -76,12 +78,21 @@ public class GlobalExceptionHandler {
      * Handle JSON parse errors (invalid JSON format)
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorDto> handleJsonParseError(HttpMessageNotReadableException ex) {
-        ErrorDto errorDto = new ErrorDto(
-                HttpStatus.BAD_REQUEST.value(),
-                "Malformed JSON request"
-        );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDto);
+    public ResponseEntity<String> handleJsonParseError(HttpMessageNotReadableException ex) {
+
+        Throwable cause = ex.getCause();
+
+        if (cause instanceof InvalidFormatException ife &&
+                ife.getTargetType().equals(LocalDate.class)) {
+
+            return ResponseEntity
+                    .badRequest()
+                    .body("Invalid birthDate format. Use yyyy-MM-dd");
+        }
+
+        return ResponseEntity
+                .badRequest()
+                .body("Invalid request format");
     }
 
 

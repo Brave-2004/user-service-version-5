@@ -2,12 +2,14 @@ package Application.service;
 
 import Application.dto.CreateUserRequest;
 import Application.dto.LoginRequest;
+import Application.exception.InvalidCredentialsException;
 import Application.model.User;
 import Application.service.KeycloakApiService;
 import Application.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Map;
 
@@ -41,6 +43,6 @@ public class AuthService {
     }
 
     public Map<String, Object> login(LoginRequest req) {
-        return keycloakApiService.login(req.getUsername(), req.getPassword());
+            return keycloakApiService.login(req.getUsername(), req.getPassword());
     }
 }

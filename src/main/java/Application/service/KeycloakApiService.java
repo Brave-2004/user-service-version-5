@@ -91,25 +91,22 @@ public class KeycloakApiService {
         } catch (HttpClientErrorException e) {
 
             int status = e.getStatusCode().value();
-            String response = e.getResponseBodyAsString();
 
             // 🚫 Account locked by Keycloak
-            if (status == 429 || response.contains("Account locked")) {
-                throw new InvalidCredentialsException("Account locked. Try again in 3 minutes.");
-            }
-
-            // ❌ Wrong password but not locked yet
-            if (response.contains("Invalid user credentials")) {
+            if (status == 400 ) {
                 throw new InvalidCredentialsException("Invalid username or password.");
             }
+            if (status == 429) {
+                throw new InvalidCredentialsException("Account locked due to multiple failed login attempts. Try again later.");
+            }
+            throw new RestClientException("Keycloak login failed: " + e.getMessage(), e);
 
-            throw new InvalidCredentialsException("Login failed.");
         }
     }
 
     @SuppressWarnings("unchecked")
     // 🔹 Получение админ токена Keycloak
-    private String getAdminAccessToken() {
+    public String getAdminAccessToken() {
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "password");
         body.add("client_id", "admin-cli"); // стандартный клиент Keycloak
