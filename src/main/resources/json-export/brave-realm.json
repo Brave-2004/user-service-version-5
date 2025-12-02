@@ -1,12 +1,6 @@
 {
   "realm": "brave",
   "enabled": true,
-  "bruteForceProtected": true,
-  "failureFactor": 3,
-  "waitIncrementSeconds": 60,
-  "maxFailureWaitSeconds": 180,
-  "minimumQuickLoginWaitSeconds": 60,
-  "quickLoginCheckMilliSeconds": 3000,
 
   "roles": {
     "realm": [
