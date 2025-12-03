@@ -1,6 +1,7 @@
 package Application.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -17,19 +18,23 @@ import java.time.LocalDate;
 public class CreateUserRequest {
 
     @NotBlank
+    @Column(unique = true)
     private String username;
 
     @NotBlank
+    @Column(unique = true)
     private String password;
 
     @Email(message = "Invalid email format")
     @NotBlank
+    @Column(unique = true)
     private String email;
 
     @Pattern(
             regexp = "^\\+998([0-9]{9})$",
             message = "Phone number must be in format +998XXXXXXXXX"
     )
+    @Column(unique = true)
     private String phoneNumber;
 
     @NotBlank
@@ -44,6 +49,7 @@ public class CreateUserRequest {
             regexp = "^[A-Z]{2}[0-9]{7}$",
             message = "Passport must be in format AA1234567"
     )
+    @Column(unique = true)
     private String passport;
 
     @JsonFormat(pattern = "yyyy-MM-dd")

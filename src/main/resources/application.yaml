@@ -6,3 +6,6 @@ logging:
   level:
     org.springframework.security: DEBUG
     org.keycloak: DEBUG
+    Application: DEBUG
+    Application.controller: DEBUG
+    Application.service: DEBUG

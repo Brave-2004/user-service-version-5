@@ -2,10 +2,13 @@ package Application.handlers;
 
 import Application.dto.ErrorDto;
 import Application.dto.FieldErrorDto;
+import Application.exception.DuplicateFieldException;
 import Application.exception.InvalidCredentialsException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -14,11 +17,13 @@ import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidCredentialsException.class)
@@ -95,17 +100,31 @@ public class GlobalExceptionHandler {
                 .body("Invalid request format");
     }
 
-
     /**
      * Handle all other exceptions
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorDto> handleGeneralException(Exception ex) {
-        ErrorDto errorDto = new ErrorDto(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                ex.getMessage()
-        );
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDto);
+    public ResponseEntity<Map<String, String>> handleGeneral(Exception ex) {
+        log.error("Unexpected error:", ex);
+        return ResponseEntity
+                .status(500)
+                .body(Map.of("error", "Internal server error"));
     }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, String>> handleAccessDenied(AccessDeniedException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("status", "403");
+        response.put("message", "You do not have permission to access this resource");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler(DuplicateFieldException.class)
+    public ResponseEntity<Map<String, String>> handleDuplicate(DuplicateFieldException ex) {
+        log.warn("Duplicate field error: {}", ex.getMessage());
+        return ResponseEntity
+                .status(409)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
 }
