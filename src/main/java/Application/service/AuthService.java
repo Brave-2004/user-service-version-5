@@ -3,6 +3,7 @@ package Application.service;
 import Application.dto.CreateUserRequest;
 import Application.dto.LoginRequest;
 import Application.exception.InvalidCredentialsException;
+import Application.exception.PhoneNotVerifiedException;
 import Application.model.User;
 import Application.service.KeycloakApiService;
 import Application.service.UserService;
@@ -19,8 +20,12 @@ public class AuthService {
 
     private final KeycloakApiService keycloakApiService;
     private final UserService userService;
+    private final OtpService otpService;
 
     public Map<String, Object> register(CreateUserRequest req) {
+        if (!otpService.isPhoneVerified(req.getPhoneNumber())) {
+            throw new PhoneNotVerifiedException(req.getPhoneNumber());
+        }
 
         // Создаем пользователя в Keycloak
         String keycloakId = keycloakApiService.createKeycloakUser(

@@ -4,6 +4,7 @@ import Application.dto.ErrorDto;
 import Application.dto.FieldErrorDto;
 import Application.exception.DuplicateFieldException;
 import Application.exception.InvalidCredentialsException;
+import Application.exception.PhoneNotVerifiedException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -124,6 +125,13 @@ public class GlobalExceptionHandler {
         log.warn("Duplicate field error: {}", ex.getMessage());
         return ResponseEntity
                 .status(409)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(PhoneNotVerifiedException.class)
+    public ResponseEntity<Object> handlePhoneNotVerified(PhoneNotVerifiedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("error", ex.getMessage()));
     }
 
