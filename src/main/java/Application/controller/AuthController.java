@@ -4,6 +4,7 @@ import Application.dto.CreateUserRequest;
 import Application.dto.LoginRequest;
 import Application.service.AuthService;
 import Application.service.KeycloakApiService;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
+    @Transactional
     public ResponseEntity<Map<String, Object>> register(@RequestBody @Valid CreateUserRequest req) {
         return ResponseEntity.ok(authService.register(req));
     }

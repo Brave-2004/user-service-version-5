@@ -43,6 +43,7 @@ public class AuthService {
     }
 
     public Map<String, Object> login(LoginRequest req) {
-            return keycloakApiService.login(req.getUsername(), req.getPassword());
+        return keycloakApiService.login(req.getUsername(), req.getPassword());
     }
+
 }

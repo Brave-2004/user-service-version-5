@@ -2,10 +2,7 @@ package Application.service;
 
 import Application.exception.InvalidCredentialsException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -80,6 +77,7 @@ public class KeycloakApiService {
         body.add("password", password);
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+
         try {
             ResponseEntity<Map> response = restTemplate.postForEntity(
                     keycloakUrl + "/realms/" + realm + "/protocol/openid-connect/token",
@@ -89,20 +87,46 @@ public class KeycloakApiService {
             return response.getBody();
 
         } catch (HttpClientErrorException e) {
+            // Always 401 for login failure
+            if (e.getStatusCode().value() == 401) {
 
-            int status = e.getStatusCode().value();
+                // 🔹 Query Keycloak Admin API for brute-force info
+                String adminToken = getAdminAccessToken(); // your admin token method
+                String userId = fetchKeycloakUserIdByUsername(username, adminToken);
 
-            // 🚫 Account locked by Keycloak
-            if (status == 400 ) {
+                HttpHeaders adminHeaders = new HttpHeaders();
+                adminHeaders.setBearerAuth(adminToken);
+
+                ResponseEntity<Map> bfResponse = restTemplate.exchange(
+                        keycloakUrl + "/admin/realms/" + realm + "/attack-detection/brute-force/users/" + userId,
+                        HttpMethod.GET,
+                        new HttpEntity<>(adminHeaders),
+                        Map.class
+                );
+
+                Map<String, Object> bfData = bfResponse.getBody();
+                Integer numFailures = (Integer) bfData.get("numFailures");
+                Boolean disabled = (Boolean) bfData.get("disabled");
+                Long disabledUntil = (Long) bfData.get("disabledUntil");
+
+                if (disabled != null && disabled) {
+                    throw new InvalidCredentialsException("Account temporarily locked. Try again later.");
+                } else if (numFailures != null && numFailures > 0) {
+                    throw new InvalidCredentialsException("Invalid username or password.");
+                } else {
+                    throw new InvalidCredentialsException("Authentication failed.");
+                }
+            }
+
+            // Client secret issue
+            if (e.getStatusCode().value() == 400) {
                 throw new InvalidCredentialsException("Invalid username or password.");
             }
-            if (status == 429) {
-                throw new InvalidCredentialsException("Account locked due to multiple failed login attempts. Try again later.");
-            }
-            throw new RestClientException("Keycloak login failed: " + e.getMessage(), e);
 
+            throw new InvalidCredentialsException("Authentication failed with status " + e.getStatusCode());
         }
     }
+
 
     @SuppressWarnings("unchecked")
     // 🔹 Получение админ токена Keycloak
