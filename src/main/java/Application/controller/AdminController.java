@@ -1,6 +1,5 @@
 package Application.controller;
 
-import Application.dto.UpdateUserProfile;
 import Application.dto.UserDto;
 import Application.mapper.UserMapper;
 import Application.model.User;
@@ -8,7 +7,6 @@ import Application.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,20 +19,19 @@ import java.util.stream.Collectors;
 
 @Slf4j  // <--- Lombok adds a 'log' field
 @RestController
-@RequestMapping("/api/users")
-@Tag(name = "UserController", description = "For editing user info and getting personal info, reset password")
-public class UserController {
-
+@RequestMapping("/api/admins")
+@Tag(name = "AdminController",description = "getting info about users and delete if it required")
+public class AdminController {
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    public AdminController(UserService userService) {
         this.userService = userService;
     }
 
     @Operation(summary = "Get current user info",
             description = "Fetches info of the currently logged-in user",
             security = @SecurityRequirement(name = "bearerAuth"))
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/me")
     public UserDto getCurrentUser(@AuthenticationPrincipal Jwt jwt) {
         String keycloakId = jwt.getSubject();
@@ -44,31 +41,22 @@ public class UserController {
         return UserMapper.toDto(user);
     }
 
-
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id.toString() == authentication.principal.subject")
-    public UserDto updateUser(@PathVariable UUID id, @RequestBody @Valid UpdateUserProfile req) {
-        log.info("Updating user with ID: {}", id);
-        User user = userService.updateUser(id, req);
-        log.debug("User updated: {}", user);
-        return UserMapper.toDto(user);
+    @GetMapping("/admin/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<UserDto> getAllUsers() {
+        log.info("Admin requested all users");
+        List<UserDto> users = userService.getAllUsers().stream()
+                .map(UserMapper::toDto)
+                .collect(Collectors.toList());
+        log.debug("Number of users fetched: {}", users.size());
+        return users;
     }
 
-    @Operation(summary = "Editing personal profile",
-            description = "Fetches info of the currently logged-in user",
-            security = @SecurityRequirement(name = "bearerAuth"))
-    @PutMapping("/me/edit")
-    @PreAuthorize("hasRole('USER')")
-    public UserDto updateProfile(@RequestBody @Valid UpdateUserProfile req,
-                                 @AuthenticationPrincipal Jwt jwt) {
-
-        String keycloakId = jwt.getSubject(); // USER ID from token
-
-        log.info("Updating profile for KeycloakID: {}", keycloakId);
-
-        User user = userService.updateProfile(keycloakId, req);
-
-        return UserMapper.toDto(user);
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public void deleteUser(@PathVariable UUID id) {
+        log.info("Deleting user with ID: {}", id);
+        userService.deleteUser(id);
+        log.debug("User with ID {} deleted successfully", id);
     }
-
 }

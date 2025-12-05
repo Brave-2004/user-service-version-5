@@ -13,15 +13,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDto {
-    private UUID id;
-    private String keycloakId;
-    private String email;
-    private String phoneNumber;
     private String firstName;
     private String lastName;
+    private String email;
+    private String phoneNumber;
     private String passport;
     private LocalDate birthDate;  // <-- добавлено
-    private StatusEnum status;
-    private Instant createdAt;
-    private Instant updatedAt;
+
 }

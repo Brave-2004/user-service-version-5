@@ -1,21 +1,23 @@
-package Application.service;
+package Application.service.impl;
 
+import Application.dto.CompleteProfileRequest;
 import Application.exception.InvalidCredentialsException;
+import Application.service.KeycloakService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 @Service
-public class KeycloakApiService {
+public class KeycloakApiServiceImpl implements KeycloakService {
 
     @Value("${keycloak.auth-server-url}")
     private String keycloakUrl;  // Must be something like "http://localhost:8081"
@@ -32,6 +34,41 @@ public class KeycloakApiService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
+    @Override
+    public String createUserAndGetId(CompleteProfileRequest req) {
+        String adminToken = getAdminAccessToken();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(adminToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, Object> body = Map.of(
+                "username", req.getUsername(),
+                "email", req.getEmail(),
+                "firstName", req.getFirstName(),
+                "lastName", req.getLastName(),
+                "emailVerified", true,
+                "enabled", true,
+                "attributes", Map.of(
+                        "passport", req.getPassport(),
+                        "birthDate", req.getBirthDate().toString()
+                ),
+                "credentials", List.of(Map.of(
+                        "type", "password",
+                        "value", req.getPassword(),
+                        "temporary", false
+                ))
+        );
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+        restTemplate.postForEntity(keycloakUrl + "/admin/realms/" + realm + "/users", request, String.class);
+
+        // Fetch the Keycloak user ID
+        return fetchKeycloakUserIdByUsername(req.getUsername(), adminToken);
+    }
+
+
+    @Override
     // 🔹 Создание пользователя в Keycloak через Admin API
     public String createKeycloakUser(String username, String password, String email, String firstName, String lastName) {
         // Получаем admin токен для Keycloak
@@ -63,6 +100,7 @@ public class KeycloakApiService {
         return fetchKeycloakUserIdByUsername(username, adminToken);
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     // 🔹 Вход пользователя (получение токенов)
     public Map<String, Object> login(String username, String password) {
@@ -128,6 +166,7 @@ public class KeycloakApiService {
     }
 
 
+    @Override
     @SuppressWarnings("unchecked")
     // 🔹 Получение админ токена Keycloak
     public String getAdminAccessToken() {
@@ -149,8 +188,9 @@ public class KeycloakApiService {
         return tokenResponse.get("access_token").toString();
     }
 
+    @Override
     // 🔹 Получение ID пользователя из Keycloak
-    private String fetchKeycloakUserIdByUsername(String username, String adminToken) {
+    public String fetchKeycloakUserIdByUsername(String username, String adminToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(adminToken);
         HttpEntity<Void> request = new HttpEntity<>(headers);
@@ -167,6 +207,7 @@ public class KeycloakApiService {
     }
 
 
+    @Override
     @SuppressWarnings("unchecked")
     public void assignUserRole(String userId) {
         String adminToken = getAdminAccessToken();
@@ -199,7 +240,8 @@ public class KeycloakApiService {
     }
 
 
-    private String getClientUuid(String clientId, String adminToken) {
+    @Override
+    public String getClientUuid(String clientId, String adminToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(adminToken);
         HttpEntity<Void> request = new HttpEntity<>(headers);
@@ -212,6 +254,40 @@ public class KeycloakApiService {
         );
 
         return response.getBody()[0].get("id").toString();
+    }
+
+    @Override
+    // Update existing Keycloak user
+    public void createUser(String username, String password,
+                           String email, String firstName, String lastName,
+                           String passport, LocalDate birthDate) {
+
+        String adminToken = getAdminAccessToken();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(adminToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, Object> body = Map.of(
+                "username", username,
+                "email", email,
+                "firstName", firstName,
+                "lastName", lastName,
+                "emailVerified", true,
+                "enabled", true,
+                "attributes", Map.of(
+                        "passport", passport,
+                        "birthDate", birthDate.toString()
+                ),
+                "credentials", List.of(Map.of(
+                        "type", "password",
+                        "value", password,
+                        "temporary", false
+                ))
+        );
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+
+        restTemplate.postForEntity(keycloakUrl + "/admin/realms/" + realm + "/users", request, String.class);
     }
 
 

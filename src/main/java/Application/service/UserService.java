@@ -1,7 +1,7 @@
 package Application.service;
 
-import Application.dto.CreateUserRequest;
-import Application.dto.UpdateUserRequest;
+import Application.dto.UpdateUserProfile;
+import Application.model.TempUser;
 import Application.model.User;
 
 import java.util.List;
@@ -15,9 +15,13 @@ public interface UserService {
 
     User getUserByKeycloakId(String keycloakId);
 
-    User createUser(String keycloakId, CreateUserRequest req);
 
-    User updateUser(UUID id, UpdateUserRequest req);
+    User updateUser(UUID id, UpdateUserProfile req);
 
     void deleteUser(UUID id);
+
+    TempUser getOrCreateTempUser(String phoneNumber);
+
+    User updateProfile(String keycloakId,UpdateUserProfile req);
+
 }

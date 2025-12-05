@@ -13,33 +13,41 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
     private final KeycloakRoleConverter keycloakRoleConverter;
+
+    // 1️⃣ Public endpoints chain (OTP / temp-token)
+    @Bean
+    public SecurityFilterChain publicEndpoints(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/auth/send-otp", "/auth/verify-otp", "/auth/complete-profile","/auth/login")
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+
+        return http.build();
+    }
+
+    // 2️⃣ Protected endpoints chain (Keycloak JWT)
+    @Bean
+    public SecurityFilterChain protectedEndpoints(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/api/**")
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .oauth2ResourceServer(oauth -> oauth
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthConverter()))
+                );
+
+        return http.build();
+    }
 
     @Bean
     public JwtAuthenticationConverter jwtAuthConverter() {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(keycloakRoleConverter);
         return converter;
-    }
-
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/public/**").permitAll()
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/api/users/**").authenticated()
-                        .anyRequest().authenticated()
-                )
-                .oauth2ResourceServer(oauth -> oauth
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthConverter()))
-                );
-
-        return http.build();
     }
 
     @Bean

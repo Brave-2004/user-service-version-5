@@ -1,16 +1,12 @@
 package Application.controller;
 
-import Application.dto.CreateUserRequest;
-import Application.dto.LoginRequest;
-import Application.dto.OtpVerifyRequest;
+import Application.dto.*;
 import Application.service.AuthService;
-import Application.service.KeycloakApiService;
 import Application.service.OtpService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -22,10 +18,9 @@ import java.util.Map;
 public class AuthController {
 
     private final OtpService otpService;
-    private final KeycloakApiService keycloakApiService;
     private final AuthService authService;
 
-    // Step 1: Send OTP
+    // STEP 1 — Send OTP
     @PostMapping("/send-otp")
     public ResponseEntity<String> sendOtp(@RequestBody OtpVerifyRequest request) {
         otpService.generateOtp(request.getPhoneNumber());
@@ -33,38 +28,42 @@ public class AuthController {
         return ResponseEntity.ok("OTP sent successfully");
     }
 
-    // Step 2: Verify OTP
+    // STEP 2 — Verify OTP and issue temporary token
     @PostMapping("/verify-otp")
-    public ResponseEntity<String> verifyOtp(@RequestBody OtpVerifyRequest  request) {
+    public ResponseEntity<Map<String, Object>> verifyOtp(@RequestBody OtpVerifyRequest request) {
         otpService.verifyOtp(request.getPhoneNumber(), request.getOtp());
         log.info("OTP verified for phone: {}", request.getPhoneNumber());
-        return ResponseEntity.ok("OTP verified successfully");
+
+        // Generate temporary JWT linked to temp user
+        Map<String, Object> tempToken = authService.issueTemporaryToken(request.getPhoneNumber());
+
+        return ResponseEntity.ok(tempToken);
     }
 
-    // Step 3: Register profile (phone already verified)
-    @PostMapping("/register")
-    @Transactional
-    public ResponseEntity<Map<String, Object>> register(@RequestBody @Valid CreateUserRequest req) {
-        try {
-            log.info("Registration attempt for username: {}", req.getUsername());
-
-            Map<String, Object> result = authService.register(req);
-
-            log.info("User registered successfully: {}", req.getUsername());
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            log.warn("Registration failed for username {}: {}", req.getUsername(), e.getMessage());
-            throw e;
+    // STEP 3 — Complete profile using temporary token
+    @PostMapping("/complete-profile")
+    public ResponseEntity<Map<String, Object>> completeProfile(
+            @RequestHeader(name = "Authorization") String authHeader,
+            @RequestBody @Valid CompleteProfileRequest req
+    ) {
+        // Remove "Bearer " prefix if present
+        String tempToken;
+        if (authHeader.startsWith("Bearer ")) {
+            tempToken = authHeader.substring(7).trim();
+        } else {
+            tempToken = authHeader.trim();
         }
+        Map<String, Object> tokens = authService.completeProfileAndLogin(tempToken, req);
+        return ResponseEntity.ok(tokens);
     }
 
-    // Step 4: Login
+
+    // STEP 4 — Normal login
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest request) {
-            log.info("Login attempt for user: {}", request.getUsername());
-            Map<String, Object> tokens = keycloakApiService.login(request.getUsername(), request.getPassword());
-            log.info("Login successful for user: {}", request.getUsername());
-            return ResponseEntity.ok(tokens);
-
+        log.info("Login attempt for: {}", request.getUsername());
+        Map<String, Object> tokens = authService.login(request);
+        log.info("Login successful for: {}", request.getUsername());
+        return ResponseEntity.ok(tokens);
     }
 }

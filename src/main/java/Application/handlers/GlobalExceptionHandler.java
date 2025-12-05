@@ -4,6 +4,7 @@ import Application.dto.ErrorDto;
 import Application.dto.FieldErrorDto;
 import Application.exception.DuplicateFieldException;
 import Application.exception.InvalidCredentialsException;
+import Application.exception.InvalidTemporaryTokenException;
 import Application.exception.PhoneNotVerifiedException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import lombok.extern.slf4j.Slf4j;
@@ -133,6 +134,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidTemporaryTokenException.class)
+    public ResponseEntity<Object> handleInvalidTemporaryToken(InvalidTemporaryTokenException ex) {
+        // Return 401 Unauthorized for invalid/expired temporary token
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of(
+                        "error", "InvalidTemporaryToken",
+                        "message", ex.getMessage()
+                ));
     }
 
 }
