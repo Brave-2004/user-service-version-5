@@ -1,0 +1,11 @@
+# application-db.yaml
+spring:
+  config:
+    activate:
+      on-profile: db
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/usersdb
+    username: postgres
+    password: 926
+    driver-class-name: org.postgresql.Driver

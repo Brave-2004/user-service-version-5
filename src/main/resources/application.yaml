@@ -1,9 +1,8 @@
+# application.yaml
 spring:
-  datasource:
-    url: jdbc:postgresql://db:5432/usersdb
-    username: postgres
-    password: 0926
-  jpa:
-    hibernate:
-      ddl-auto: updategit
-    show-sql: true
+  profiles:
+    active: db,jpa,security,keycloak  # ✅ valid here
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.keycloak: DEBUG

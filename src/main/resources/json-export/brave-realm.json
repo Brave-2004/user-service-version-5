@@ -1,0 +1,83 @@
+{
+  "realm": "brave",
+  "enabled": true,
+  "bruteForceProtected": true,
+  "failureFactor": 3,
+  "waitIncrementSeconds": 60,
+  "maxFailureWaitSeconds": 180,
+  "minimumQuickLoginWaitSeconds": 60,
+  "quickLoginCheckMilliSeconds": 3000,
+
+  "roles": {
+    "realm": [
+      {
+        "name": "client_admin",
+        "description": ""
+      },
+      {
+        "name": "client_user",
+        "description": ""
+      }
+    ],
+    "client": {
+      "brave-rest-api": [
+        {
+          "name": "USER",
+          "description": ""
+        },
+        {
+          "name": "ADMIN",
+          "description": ""
+        }
+      ]
+    }
+  },
+
+  "clients": [
+    {
+      "clientId": "brave-rest-api",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "your-client-secret",
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "protocol": "openid-connect",
+      "clientAuthenticatorType": "client-secret",
+      "defaultRoles": [
+        "USER"
+      ],
+      "authorizationServicesEnabled": false,
+      "attributes": {}
+    }
+  ],
+
+  "users": [
+    {
+      "username": "brave",
+      "enabled": true,
+      "email": "brave20040926@gmail.com",
+      "firstName": "Jasurbek",
+      "lastName": "Djuraev",
+      "emailVerified": true,
+
+      "credentials": [
+        {
+          "type": "password",
+          "value": "0926",
+          "temporary": false
+        }
+      ],
+
+      "realmRoles": [
+        "client_admin"
+      ],
+
+      "clientRoles": {
+        "brave-rest-api": [
+          "ADMIN"
+        ]
+      }
+    }
+  ]
+}
